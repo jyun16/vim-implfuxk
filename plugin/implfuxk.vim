@@ -10,10 +10,26 @@ function! GetInterfaceName()
 	return expand('<cword>')
 endfunction
 
+function! GetTagFile()
+	let tags_files = split(&tags, ',')
+	for f in tags_files
+		let p = fnamemodify(f, ':p')
+		if filereadable(p)
+			return p
+		endif
+	endfor
+	return ''
+endfunction
+
 function! ImplFuxk()
 	let word = GetInterfaceName()
+	let tagfile = GetTagFile()
+	if tagfile == ''
+		echo "No tags file found"
+		return
+	endif
 	let pattern = 'implements ' . word
-	let taglines = systemlist('grep "' . pattern . '" tags')
+	let taglines = systemlist('grep "' . pattern . '" ' . tagfile)
 	let results = []
 	for line in taglines
 		let fields = split(line, '\t')
